@@ -1,0 +1,13 @@
+config:
+  source: ${DOTSTRAP}
+
+packages:
+  git:
+    glob: *
+    link: true
+  # vim:
+  #   path: vim
+  #   link: true
+  #   links:
+  #     vimrc:
+  #       source: vim/vimrc
