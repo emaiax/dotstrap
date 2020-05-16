@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  dotstrap:
+    build: .
+    working_dir: /go/src/github.com/emaiax/dotstrap
+    volumes:
+      - ./:/go/src/github.com/emaiax/dotstrap
