@@ -38,3 +38,42 @@ func TestLoadVariablesConfig(t *testing.T) {
 
   assert.Equal(t, env.Config, customConfig)
 }
+
+func TestLoadGlobPackages(t *testing.T) {
+  env, _ := Load("./testdata/glob.packages.yml")
+
+  assert.Contains(
+    t,
+    env.Packages["mypackage"].Files,
+    struct{
+      Source string
+      Target string
+    }{
+      Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/glob.packages.yml",
+      Target: "/root/.glob.packages.yml",
+    },
+  )
+}
+
+
+func TestLoadLinksPackages(t *testing.T) {
+  env, _ := Load("./testdata/links.packages.yml")
+
+  assert.ElementsMatch(
+    t,
+    env.Packages["mypackage"].Files,
+    []struct{
+      Source string
+      Target string
+    }{
+      {
+        Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/links.packages.yml",
+        Target: "/root/.linkpack",
+      },
+      {
+        Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/glob.packages.yml",
+        Target: "/root/.globpack",
+      },
+    },
+  )
+}

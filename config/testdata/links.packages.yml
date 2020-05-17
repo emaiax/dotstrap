@@ -1,0 +1,10 @@
+config:
+  source: .
+  target: /root
+
+packages:
+  mypackage:
+    link: true
+    links:
+      globpack: /testdata/glob.packages.yml
+      linkpack: /testdata/links.packages.yml
