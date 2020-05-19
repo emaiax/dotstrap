@@ -16,9 +16,9 @@ func Confirm(message string, ioReader io.Reader) bool {
 
 	text, _ := reader.ReadString('\n')
 
-  if text != "\n" {
+	if text != "\n" {
 		fmt.Println()
-  }
+	}
 
 	return strings.ToLower(text) != strings.ToLower("n\n")
 }
