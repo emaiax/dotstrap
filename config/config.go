@@ -1,7 +1,7 @@
 package config
 
 import (
-  "fmt"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,7 +12,6 @@ import (
 )
 
 type Environment struct {
-  DryRun   bool               `yaml:"dry_run"`
 	Config   Config             `yaml:"config"`
 	Packages map[string]Package `yaml:"packages"`
 }
@@ -20,35 +19,49 @@ type Environment struct {
 type Config struct {
 	Source string `yaml:"source"`
 	Target string `yaml:"target"`
+
+	// Prompts user before installing each package
+	//
+	Confirm bool `yaml:"confirm"`
+
+	// Don't really install the files if it's just a dry run
+	//
+	DryRun bool `yaml:"dry_run"`
 }
 
 type Package struct {
-  Path  string `yaml:"path"`
+	Name string
+	Path string `yaml:"path"`
 
-  // Create a symlink instead of copying the file
-  Link  bool `yaml:"link"`
+	// Create a symlink instead of copying the file
+	//
+	Link bool `yaml:"link"`
 
-  // If the symlink or the file already exists, creates a backup of the original symlink/file and re-do the operation
-  Force bool `yaml:"force"`
+	// If the symlink or the file already exists, creates a backup of the original symlink/file and re-do the operation
+	//
+	Force bool `yaml:"force"`
 
-  // Only runs this package for this specified OS
-  Os string `yaml:"os"`
+	// Only runs this package for this specified OS
+	//
+	Os string `yaml:"os"`
 
-  // Allows creating symlinks in multiple but specificed files at once besides linking the package folder
-  // Other options such as `link` and `force` will also be applied for these files.
-  //
-  Links map[string]string `yaml:"links"`
+	// Allows creating symlinks in multiple but specificed files at once besides linking the package folder
+	// Other options such as `link` and `force` will also be applied for these files.
+	//
+	Links map[string]string `yaml:"links"`
 
-  // Glob allows applying the same operation in multiple files at once WITHOUT linking the package folder.
-  // Other options such as `link` and `force` will only be applied for the files inside the `path` option.
-  //
-  Glob bool `yaml:"glob"`
+	// Glob allows applying the same operation in multiple files at once WITHOUT linking the package folder.
+	// Other options such as `link` and `force` will only be applied for the files inside the `path` option.
+	//
+	Glob bool `yaml:"glob"`
 
-  // Struct that'll be used to keep track of sources and targets when linking from `glob` or `links`
-  Files []struct {
-    Source string
-    Target string
-  }
+	// Struct that'll be used to keep track of sources and targets when linking from `glob` or `links`
+	//
+	Files []struct {
+		Name   string
+		Source string
+		Target string
+	}
 }
 
 func Load(file string) (*Environment, error) {
@@ -63,7 +76,7 @@ func Load(file string) (*Environment, error) {
 	err = yaml.Unmarshal(config, &env)
 
 	if err != nil {
-    fmt.Println(err)
+		fmt.Println(err)
 
 		return nil, err
 	}
@@ -78,56 +91,70 @@ func Load(file string) (*Environment, error) {
 
 	env.Config.resolvePaths()
 
-  for key, pack := range env.Packages {
-    // resolve globs from packages
-    //
-    if pack.Glob {
-      fullPath := getPublicPath(env.Config.Source, pack.Path)
+	// if _, debug := os.LookupEnv("DEBUG"); debug {
+	// 	fmt.Printf("Config: %+v\n", env.Config)
+	// }
 
-      files, err := filepath.Glob(fullPath)
+	for key, pack := range env.Packages {
+		pack.Name = key
 
-      if err != nil {
-        fmt.Println(err)
+		// resolve globs from packages
+		//
+		if pack.Glob {
+			fullPath := getPublicPath(env.Config.Source, pack.Path)
 
-        return nil, err
-      }
+			files, err := filepath.Glob(fullPath)
 
-      for _, file := range files {
-        fileSource := file
-        fileTarget := getPrivatePath(env.Config.Target, filepath.Base(file))
+			if err != nil {
+				fmt.Println(err)
 
-        globFile := struct{
-          Source string
-          Target string
-        }{
-          Source: fileSource,
-          Target: fileTarget,
-        }
+				return nil, err
+			}
 
-        pack.Files = append(pack.Files, globFile)
-      }
-    }
+			for _, file := range files {
+				baseName := filepath.Base(file)
 
-    // resolve links from packages
-    //
-    for targetName, sourceName := range pack.Links {
-      sourcePath := getPublicPath(env.Config.Source, sourceName)
-      targetPath := getPrivatePath(env.Config.Target, targetName)
+				fileSource := file
+				fileTarget := getPrivatePath(env.Config.Target, baseName)
 
-      linkFile := struct{
-        Source string
-        Target string
-      }{
-        Source: sourcePath,
-        Target: targetPath,
-      }
+				globFile := struct {
+					Name   string
+					Source string
+					Target string
+				}{
+					Name:   baseName,
+					Source: fileSource,
+					Target: fileTarget,
+				}
 
-      pack.Files = append(pack.Files, linkFile)
+				pack.Files = append(pack.Files, globFile)
+			}
+		}
 
-    }
+		// resolve links from packages
+		//
+		for targetName, sourceName := range pack.Links {
+			baseName := filepath.Base(sourceName)
 
-    env.Packages[key] = pack
-  }
+			sourcePath := getPublicPath(env.Config.Source, sourceName)
+			targetPath := getPrivatePath(env.Config.Target, targetName)
+
+			linkFile := struct {
+				Name   string
+				Source string
+				Target string
+			}{
+				Name:   baseName,
+				Source: sourcePath,
+				Target: targetPath,
+			}
+
+			pack.Files = append(pack.Files, linkFile)
+
+		}
+
+		env.Packages[key] = pack
+	}
 
 	return &env, nil
 }
@@ -165,9 +192,9 @@ func resolveEnvVar(s string, defaultPathFn func() (string, error)) string {
 }
 
 func getPublicPath(base string, file string) string {
-  return filepath.Join(base, file)
+	return filepath.Join(base, file)
 }
 
 func getPrivatePath(base string, file string) string {
-  return filepath.Join(base, "." + file)
+	return filepath.Join(base, "."+file)
 }

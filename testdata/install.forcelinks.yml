@@ -1,0 +1,10 @@
+config:
+  source: .
+  target: .
+
+packages:
+  mypackage:
+    link: true
+    force: true
+    links:
+      linkpack: ../testdata/install.forcelinks.yml

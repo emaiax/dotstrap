@@ -1,0 +1,9 @@
+config:
+  source: .
+  target: .
+
+packages:
+  mypackage:
+    link: true
+    links:
+      linkpack: ../testdata/install.links.yml

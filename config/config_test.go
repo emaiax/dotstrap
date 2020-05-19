@@ -1,79 +1,82 @@
 package config
 
 import (
-  "log"
-  "os"
-  "testing"
+	"log"
+	"os"
+	"testing"
 
-  "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadEmptyConfig(t *testing.T) {
-  env, _ := Load("./testdata/empty.config.yml")
+	env, _ := Load("../testdata/config.empty.yml")
 
-  defaultConfig := Config{Source: "/go/src/github.com/emaiax/dotstrap/config", Target: "/root"}
+	defaultConfig := Config{Source: "/go/src/github.com/emaiax/dotstrap/config", Target: "/root"}
 
-  assert.Equal(t, env.Config, defaultConfig)
+	assert.Equal(t, env.Config, defaultConfig)
 }
 
 func TestLoadCustomConfig(t *testing.T) {
-  env, _ := Load("./testdata/custom.config.yml")
+	env, _ := Load("../testdata/config.custom.yml")
 
-  customConfig := Config{Source: "/root/dotstrap", Target: "/root/dotfiles"}
+	customConfig := Config{Source: "/root/dotstrap", Target: "/root/dotfiles"}
 
-  assert.Equal(t, env.Config, customConfig)
+	assert.Equal(t, env.Config, customConfig)
 }
 
-
 func TestLoadVariablesConfig(t *testing.T) {
-  err := os.Setenv("DOTFILES", "..")
+	err := os.Setenv("DOTFILES", "..")
 
-  if err != nil {
-    log.Fatal(err)
-  }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  env, _ := Load("./testdata/variables.config.yml")
+	env, _ := Load("../testdata/config.variables.yml")
 
-  customConfig := Config{Source: "/go/src/github.com/emaiax/dotstrap", Target: "/root/mydotfiles"}
+	customConfig := Config{Source: "/go/src/github.com/emaiax/dotstrap", Target: "/root/mydotfiles"}
 
-  assert.Equal(t, env.Config, customConfig)
+	assert.Equal(t, env.Config, customConfig)
 }
 
 func TestLoadGlobPackages(t *testing.T) {
-  env, _ := Load("./testdata/glob.packages.yml")
+	env, _ := Load("../testdata/packages.glob.yml")
 
-  assert.Contains(
-    t,
-    env.Packages["mypackage"].Files,
-    struct{
-      Source string
-      Target string
-    }{
-      Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/glob.packages.yml",
-      Target: "/root/.glob.packages.yml",
-    },
-  )
+	assert.Contains(
+		t,
+		env.Packages["mypackage"].Files,
+		struct {
+			Name   string
+			Source string
+			Target string
+		}{
+			Name:   "packages.glob.yml",
+			Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.glob.yml",
+			Target: "/root/.packages.glob.yml",
+		},
+	)
 }
 
-
 func TestLoadLinksPackages(t *testing.T) {
-  env, _ := Load("./testdata/links.packages.yml")
+	env, _ := Load("../testdata/packages.links.yml")
 
-  assert.ElementsMatch(
-    t,
-    env.Packages["mypackage"].Files,
-    []struct{
-      Source string
-      Target string
-    }{
-      {
-        Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/links.packages.yml",
-        Target: "/root/.linkpack",
-      },
-      {
-        Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/glob.packages.yml",
-        Target: "/root/.globpack",
-      },
-    },
-  )
+	assert.ElementsMatch(
+		t,
+		env.Packages["mypackage"].Files,
+		[]struct {
+			Name   string
+			Source string
+			Target string
+		}{
+			{
+				Name:   "packages.glob.yml",
+				Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.glob.yml",
+				Target: "/root/.globpack",
+			},
+			{
+				Name:   "packages.links.yml",
+				Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.links.yml",
+				Target: "/root/.linkpack",
+			},
+		},
+	)
 }
