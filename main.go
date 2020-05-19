@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/emaiax/dotstrap/config"
-	// "github.com/emaiax/dotstrap/files"
+	"github.com/emaiax/dotstrap/packages"
 	"github.com/emaiax/dotstrap/terminal"
 )
 
@@ -17,7 +17,7 @@ func init() {
 }
 
 func main() {
-	terminal.Init()
+	terminal.Start()
 
 	env, err := config.Load(configFile)
 
@@ -30,32 +30,25 @@ func main() {
 	}
 
 	if err != nil {
+		fmt.Println(terminal.Bold(terminal.Error(fmt.Sprint(err))))
+
 		terminal.Quit()
+
 		os.Exit(-1)
 	}
 
-	terminal.Config(env)
+	terminal.PrintConfigs(env.Config.Source, env.Config.Target, env.Config.DryRun)
 
-	if env != nil {
-		// if terminal.Confirm("Proceed?", os.Stdin) {
-		//   dotPath, _ := files.DotfilesPath()
-		//
-		//   for _, path := range files.DotfilesFolders(dotPath) {
-		//     println(path)
-		//   }
-		//
-		//   _, err := files.InstallDotfiles()
-		//
-		//   if err != nil {
-		//     log.Fatal(err)
-		//     terminal.Quit()
-		//   } else {
-		//     terminal.Finish()
-		//   }
-		// } else {
-		//   terminal.Quit()
-		// }
+	if terminal.Confirm("Proceed to install?", os.Stdin) {
+		packagesInstall := make(map[string]bool)
+
+		for _, pack := range env.Packages {
+			packagesInstall[pack.Name] = packages.Install(pack, env.Config)
+		}
+
+		terminal.PrintRevision(packagesInstall)
+		terminal.Finish()
+	} else {
+		terminal.Quit()
 	}
-
-	terminal.Finish()
 }
