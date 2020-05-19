@@ -44,11 +44,7 @@ func TestLoadGlobPackages(t *testing.T) {
 	assert.Contains(
 		t,
 		env.Packages["mypackage"].Files,
-		struct {
-			Name   string
-			Source string
-			Target string
-		}{
+		PackageFile{
 			Name:   "packages.glob.yml",
 			Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.glob.yml",
 			Target: "/root/.packages.glob.yml",
@@ -62,17 +58,13 @@ func TestLoadLinksPackages(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		env.Packages["mypackage"].Files,
-		[]struct {
-			Name   string
-			Source string
-			Target string
-		}{
-			{
+		[]PackageFile{
+			PackageFile{
 				Name:   "packages.glob.yml",
 				Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.glob.yml",
 				Target: "/root/.globpack",
 			},
-			{
+			PackageFile{
 				Name:   "packages.links.yml",
 				Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.links.yml",
 				Target: "/root/.linkpack",

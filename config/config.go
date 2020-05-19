@@ -55,13 +55,15 @@ type Package struct {
 	//
 	Glob bool `yaml:"glob"`
 
-	// Struct that'll be used to keep track of sources and targets when linking from `glob` or `links`
+	// Array that'll be used to keep track of sources and targets when linking from `glob` or `links`
 	//
-	Files []struct {
-		Name   string
-		Source string
-		Target string
-	}
+	Files []PackageFile
+}
+
+type PackageFile struct {
+	Name   string
+	Source string
+	Target string
 }
 
 func Load(file string) (*Environment, error) {
@@ -117,15 +119,7 @@ func Load(file string) (*Environment, error) {
 				fileSource := file
 				fileTarget := getPrivatePath(env.Config.Target, baseName)
 
-				globFile := struct {
-					Name   string
-					Source string
-					Target string
-				}{
-					Name:   baseName,
-					Source: fileSource,
-					Target: fileTarget,
-				}
+				globFile := PackageFile{Name: baseName, Source: fileSource, Target: fileTarget}
 
 				pack.Files = append(pack.Files, globFile)
 			}
@@ -139,18 +133,9 @@ func Load(file string) (*Environment, error) {
 			sourcePath := getPublicPath(env.Config.Source, sourceName)
 			targetPath := getPrivatePath(env.Config.Target, targetName)
 
-			linkFile := struct {
-				Name   string
-				Source string
-				Target string
-			}{
-				Name:   baseName,
-				Source: sourcePath,
-				Target: targetPath,
-			}
+			linkFile := PackageFile{Name: baseName, Source: sourcePath, Target: targetPath}
 
 			pack.Files = append(pack.Files, linkFile)
-
 		}
 
 		env.Packages[key] = pack
