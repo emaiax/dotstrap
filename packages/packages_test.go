@@ -19,7 +19,7 @@ func TestInstallLinkFilesSuccess(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	assert.True(t, Install(env.Packages["mypackage"], env.Config))
+	assert.True(t, Install(env.Packages["mypackage"]))
 
 	// now both files exist
 	//
@@ -41,7 +41,7 @@ func TestInstallLinkFilesError(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	assert.True(t, Install(env.Packages["mypackage"], env.Config))
+	assert.True(t, Install(env.Packages["mypackage"]))
 
 	// now both files exist
 	//
@@ -50,7 +50,7 @@ func TestInstallLinkFilesError(t *testing.T) {
 
 	// error when trying to link again without FORCE option
 	//
-	assert.False(t, Install(env.Packages["mypackage"], env.Config))
+	assert.False(t, Install(env.Packages["mypackage"]))
 
 	// cleaning
 	//
@@ -67,7 +67,7 @@ func TestInstallForceLinkFiles(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	assert.True(t, Install(env.Packages["mypackage"], env.Config))
+	assert.True(t, Install(env.Packages["mypackage"]))
 
 	// now both files exist
 	//
@@ -76,7 +76,7 @@ func TestInstallForceLinkFiles(t *testing.T) {
 
 	// success when trying to link again with FORCE option
 	//
-	assert.True(t, Install(env.Packages["mypackage"], env.Config))
+	assert.True(t, Install(env.Packages["mypackage"]))
 
 	// now both files still exist
 	//

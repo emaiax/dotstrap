@@ -21,6 +21,9 @@ func main() {
 
 	env, err := config.Load(configFile)
 
+  // TODO: check if user has write access to env.Config.Target
+  // otherwise it won't be possible to install anything
+  //
 	if os.IsNotExist(err) {
 		fmt.Println(terminal.Bold(terminal.Error("Config file not found.")))
 
@@ -43,7 +46,7 @@ func main() {
 		packagesInstall := make(map[string]bool)
 
 		for _, pack := range env.Packages {
-			packagesInstall[pack.Name] = packages.Install(pack, env.Config)
+			packagesInstall[pack.Name] = packages.Install(pack)
 		}
 
 		terminal.PrintRevision(packagesInstall)
