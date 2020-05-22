@@ -39,10 +39,11 @@ func PrintConfigs(source, target string, dryRun bool) {
 func PrintRevision(packagesInstall map[string]bool) {
 	fmt.Println()
 	fmt.Println(Bold(textWithDivider("dotfiles revision")))
-	fmt.Println()
+	fmt.Println(packagesInstall)
 
 	for packName, installed := range packagesInstall {
 		var message string
+    fmt.Println(packName)
 
 		if installed {
 			message = fmt.Sprintf(
