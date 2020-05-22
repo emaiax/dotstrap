@@ -10,4 +10,8 @@ setup:
 
 .PHONY: test
 test:
-	gotest $(TEST_OPTIONS) -v -failfast $(SOURCE_FILES) -run $(TEST_PATTERN) -timeout=2m
+	DEBUG=true gotest $(TEST_OPTIONS) -v -failfast $(SOURCE_FILES) -run $(TEST_PATTERN) -covermode=atomic -coverprofile=coverage.out -timeout=30s
+
+.PHONY: coverage
+coverage:
+	go tool cover -html=coverage.out
