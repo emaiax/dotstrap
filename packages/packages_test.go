@@ -10,7 +10,7 @@ import (
 )
 
 func TestInstallLinkFilesSuccess(t *testing.T) {
-	env, _ := config.Load("../testdata/install.links.yml")
+	env, _ := config.Load("testdata/install.links.yml")
 
 	file := env.Packages["mypackage"].Files[0]
 
@@ -32,7 +32,7 @@ func TestInstallLinkFilesSuccess(t *testing.T) {
 }
 
 func TestInstallLinkFilesError(t *testing.T) {
-	env, _ := config.Load("../testdata/install.links.yml")
+	env, _ := config.Load("testdata/install.links.yml")
 
 	file := env.Packages["mypackage"].Files[0]
 
@@ -58,7 +58,7 @@ func TestInstallLinkFilesError(t *testing.T) {
 }
 
 func TestInstallForceLinkFiles(t *testing.T) {
-	env, _ := config.Load("../testdata/install.forcelinks.yml")
+	env, _ := config.Load("testdata/install.forcelinks.yml")
 
 	file := env.Packages["mypackage"].Files[0]
 

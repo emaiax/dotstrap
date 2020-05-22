@@ -6,4 +6,4 @@ packages:
   mypackage:
     link: true
     glob: true
-    path: ../testdata/*
+    path: testdata/*

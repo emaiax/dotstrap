@@ -9,7 +9,7 @@ import (
 )
 
 func TestLoadEmptyConfig(t *testing.T) {
-	env, _ := Load("../testdata/config.empty.yml")
+	env, _ := Load("testdata/config.empty.yml")
 
 	defaultConfig := Config{Source: "/go/src/github.com/emaiax/dotstrap/config", Target: "/root"}
 
@@ -17,7 +17,7 @@ func TestLoadEmptyConfig(t *testing.T) {
 }
 
 func TestLoadCustomConfig(t *testing.T) {
-	env, _ := Load("../testdata/config.custom.yml")
+	env, _ := Load("testdata/config.custom.yml")
 
 	customConfig := Config{Source: "/root/dotstrap", Target: "/root/dotfiles"}
 
@@ -31,7 +31,7 @@ func TestLoadVariablesConfig(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	env, _ := Load("../testdata/config.variables.yml")
+	env, _ := Load("testdata/config.variables.yml")
 
 	customConfig := Config{Source: "/go/src/github.com/emaiax/dotstrap", Target: "/root/mydotfiles"}
 
@@ -39,21 +39,21 @@ func TestLoadVariablesConfig(t *testing.T) {
 }
 
 func TestLoadGlobPackages(t *testing.T) {
-	env, _ := Load("../testdata/packages.glob.yml")
+	env, _ := Load("testdata/packages.glob.yml")
 
 	assert.Contains(
 		t,
 		env.Packages["mypackage"].Files,
 		PackageFile{
 			Name:   "packages.glob.yml",
-			Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.glob.yml",
+			Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/packages.glob.yml",
 			Target: "/root/.packages.glob.yml",
 		},
 	)
 }
 
 func TestLoadLinksPackages(t *testing.T) {
-	env, _ := Load("../testdata/packages.links.yml")
+	env, _ := Load("testdata/packages.links.yml")
 
 	assert.ElementsMatch(
 		t,
@@ -61,12 +61,12 @@ func TestLoadLinksPackages(t *testing.T) {
 		[]PackageFile{
 			PackageFile{
 				Name:   "packages.glob.yml",
-				Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.glob.yml",
+				Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/packages.glob.yml",
 				Target: "/root/.globpack",
 			},
 			PackageFile{
 				Name:   "packages.links.yml",
-				Source: "/go/src/github.com/emaiax/dotstrap/testdata/packages.links.yml",
+				Source: "/go/src/github.com/emaiax/dotstrap/config/testdata/packages.links.yml",
 				Target: "/root/.linkpack",
 			},
 		},

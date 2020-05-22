@@ -5,6 +5,5 @@ config:
 packages:
   mypackage:
     link: true
-    force: true
     links:
-      linkpack: ../testdata/install.forcelinks.yml
+      linkpack: testdata/install.links.yml
