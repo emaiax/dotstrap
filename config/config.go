@@ -17,7 +17,10 @@ type Environment struct {
 }
 
 type Config struct {
+  // Source path of the packages, defaults to the current directory (pwd)
 	Source string `yaml:"source"`
+
+  // Target path of the packages, defaults to User's home directory (home)
 	Target string `yaml:"target"`
 
 	// Prompts user before installing each package
