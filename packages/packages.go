@@ -7,27 +7,29 @@ import (
 	"time"
 
 	"github.com/emaiax/dotstrap/config"
-	"github.com/emaiax/dotstrap/terminal"
+	"github.com/emaiax/dotstrap/tty"
 )
 
 func Install(pack config.Package) bool {
-	var result bool = true
+  var installedFiles = make(map[bool]int)
 
-	fmt.Println(packNamePrefix(pack.Name), "Installing files...")
+	fmt.Println(packNamePrefix(pack.Name), "installing files...")
 
 	fmt.Println()
 
-	for _, file := range pack.Files {
-		if pack.Link {
-      if !linkFile(file, pack.Force) {
-        result = false
-      }
-		} else {
-      result = copyFile(file)
-		}
-	}
+  for _, file := range pack.Files {
+    var result bool
 
-	return result
+    if pack.Link {
+      result = linkFile(file, pack.Force)
+    } else {
+      result = copyFile(file)
+    }
+
+    installedFiles[result] += 1
+  }
+
+	return getInstallationResult(installedFiles) > 0
 }
 
 func packNamePrefix(packName string) string {
@@ -95,4 +97,24 @@ func copyFile(file config.PackageFile) bool {
   fmt.Println(terminal.Error("COPYING FILES IS NOT SUPPORTED AT THIS TIME."))
 
   return false
+}
+
+// returns between -1 and 1 that responds to:
+//
+// 1: all files installed
+// 0: some files installed
+// -1: no files installed
+//
+func getInstallationResult(installedFiles map[bool]int) int {
+  result := 1
+
+  if installedFiles[false] > 0 {
+    result -= 1
+  }
+
+  if installedFiles[true] == 0 {
+    result -= 1
+  }
+
+  return result
 }
