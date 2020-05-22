@@ -143,8 +143,8 @@ func (pack *Package) resolveLinkFilePaths(sourcePath, targetPath string) {
   for targetName, sourceName := range pack.Links {
     baseName := filepath.Base(sourceName)
 
-    sourcePath := getPublicPath(env.Config.Source, sourceName)
-    targetPath := getPrivatePath(env.Config.Target, targetName)
+    sourcePath := getPublicPath(sourcePath, sourceName)
+    targetPath := getPrivatePath(targetPath, targetName)
 
     linkFile := PackageFile{Name: baseName, Source: sourcePath, Target: targetPath}
 
