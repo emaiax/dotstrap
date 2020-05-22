@@ -103,37 +103,11 @@ func Load(file string) (*Environment, error) {
 	for key, pack := range env.Packages {
 		pack.Name = key
 
-		// resolve globs from packages
-		//
 		if pack.Glob {
-			fullPath := getPublicPath(env.Config.Source, pack.Path)
-
-			files, _ := filepath.Glob(fullPath)
-
-			for _, file := range files {
-				baseName := filepath.Base(file)
-
-				fileSource := file
-				fileTarget := getPrivatePath(env.Config.Target, baseName)
-
-				globFile := PackageFile{Name: baseName, Source: fileSource, Target: fileTarget}
-
-				pack.Files = append(pack.Files, globFile)
-			}
+      pack.resolveGlobFilePaths(env.Config.Source, env.Config.Target)
 		}
 
-		// resolve links from packages
-		//
-		for targetName, sourceName := range pack.Links {
-			baseName := filepath.Base(sourceName)
-
-			sourcePath := getPublicPath(env.Config.Source, sourceName)
-			targetPath := getPrivatePath(env.Config.Target, targetName)
-
-			linkFile := PackageFile{Name: baseName, Source: sourcePath, Target: targetPath}
-
-			pack.Files = append(pack.Files, linkFile)
-		}
+    pack.resolveLinkFilePaths(env.Config.Source, env.Config.Target)
 
 		env.Packages[key] = pack
 	}
@@ -147,6 +121,35 @@ func (config *Config) resolvePaths() {
 
 	config.Source = sourcePath
 	config.Target = targetPath
+}
+
+func (pack *Package) resolveGlobFilePaths(sourcePath, targetPath string) {
+  fullPath := getPublicPath(sourcePath, pack.Path)
+  files, _ := filepath.Glob(fullPath)
+
+  for _, file := range files {
+    baseName := filepath.Base(file)
+
+    fileSource := file
+    fileTarget := getPrivatePath(targetPath, baseName)
+
+    globFile := PackageFile{Name: baseName, Source: fileSource, Target: fileTarget}
+
+    pack.Files = append(pack.Files, globFile)
+  }
+}
+
+func (pack *Package) resolveLinkFilePaths(sourcePath, targetPath string) {
+  for targetName, sourceName := range pack.Links {
+    baseName := filepath.Base(sourceName)
+
+    sourcePath := getPublicPath(env.Config.Source, sourceName)
+    targetPath := getPrivatePath(env.Config.Target, targetName)
+
+    linkFile := PackageFile{Name: baseName, Source: sourcePath, Target: targetPath}
+
+    pack.Files = append(pack.Files, linkFile)
+  }
 }
 
 func resolvePath(s string, defaultPathFn func() (string, error)) string {
