@@ -108,13 +108,7 @@ func Load(file string) (*Environment, error) {
 		if pack.Glob {
 			fullPath := getPublicPath(env.Config.Source, pack.Path)
 
-			files, err := filepath.Glob(fullPath)
-
-			if err != nil {
-				fmt.Println(err)
-
-				return nil, err
-			}
+			files, _ := filepath.Glob(fullPath)
 
 			for _, file := range files {
 				baseName := filepath.Base(file)
@@ -184,5 +178,9 @@ func getPublicPath(base string, file string) string {
 }
 
 func getPrivatePath(base string, file string) string {
-	return filepath.Join(base, "."+file)
+  if strings.HasPrefix(file, ".") {
+    return filepath.Join(base, file)
+  } else {
+    return filepath.Join(base, "." + file)
+  }
 }

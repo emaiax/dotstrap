@@ -1,0 +1,9 @@
+config:
+  source: .
+  target: /root
+
+packages:
+  mypackage:
+    link: true
+    glob: true
+    path: \\
