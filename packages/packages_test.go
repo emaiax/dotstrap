@@ -12,19 +12,22 @@ import (
 func TestInstallLinkFilesSuccess(t *testing.T) {
 	env, _ := config.Load("testdata/install.links.yml")
 
-	file := env.Packages["mypackage"].Files[0]
+  pack := env.Packages["mypackage"]
+  file := pack.Files[0]
 
 	// target file doesn't exist yet
 	//
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	assert.True(t, Install(env.Packages["mypackage"]))
+  Install(&pack)
 
 	// now both files exist
 	//
 	assert.FileExists(t, file.Source)
 	assert.FileExists(t, file.Target)
+
+  assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
 
 	// cleaning
 	//
@@ -34,40 +37,41 @@ func TestInstallLinkFilesSuccess(t *testing.T) {
 func TestInstallLinkFilesError(t *testing.T) {
 	env, _ := config.Load("testdata/install.links.yml")
 
-	file := env.Packages["mypackage"].Files[0]
+  pack := env.Packages["mypackage"]
+  file := pack.Files[0]
 
-	// target file doesn't exist yet
-	//
-	assert.FileExists(t, file.Source)
-	assert.NoFileExists(t, file.Target)
+  os.Symlink(file.Source, file.Target)
 
-	assert.True(t, Install(env.Packages["mypackage"]))
-
-	// now both files exist
+	// both files exists
 	//
 	assert.FileExists(t, file.Source)
 	assert.FileExists(t, file.Target)
 
 	// error when trying to link again without FORCE option
 	//
-	assert.False(t, Install(env.Packages["mypackage"]))
+	Install(&pack)
+
+  assert.Equal(t, pack.InstallStatus(), config.NotInstalled)
 
 	// cleaning
 	//
 	cleanSymlinks(env.Config.Target)
 }
 
-func TestInstallForceLinkFiles(t *testing.T) {
+func TestInstallLinkFilesForce(t *testing.T) {
 	env, _ := config.Load("testdata/install.forcelinks.yml")
 
-	file := env.Packages["mypackage"].Files[0]
+  pack := env.Packages["mypackage"]
+	file := pack.Files[0]
 
 	// target file doesn't exist yet
 	//
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	assert.True(t, Install(env.Packages["mypackage"]))
+	Install(&pack)
+
+  assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
 
 	// now both files exist
 	//
@@ -76,9 +80,11 @@ func TestInstallForceLinkFiles(t *testing.T) {
 
 	// success when trying to link again with FORCE option
 	//
-	assert.True(t, Install(env.Packages["mypackage"]))
+	Install(&pack)
 
-	// now both files still exist
+  assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
+
+	// both files still exist
 	//
 	assert.FileExists(t, file.Source)
 	assert.FileExists(t, file.Target)
@@ -88,7 +94,79 @@ func TestInstallForceLinkFiles(t *testing.T) {
 	cleanSymlinks(env.Config.Target)
 }
 
-// copy files
+func TestBackupFileSuccess(t *testing.T) {
+	env, _ := config.Load("testdata/install.forcelinks.yml")
+
+  pack := env.Packages["mypackage"]
+	file := pack.Files[0]
+
+  // creates a Source backup to prevent real Source removal
+  //
+  fakeSource := file.Source + ".bkp"
+  backupFileName := backupFileName(fakeSource)
+
+  os.Symlink(file.Source, fakeSource)
+
+	// backup file doesn't exist yet
+	//
+	assert.FileExists(t, fakeSource)
+	assert.NoFileExists(t, backupFileName)
+
+  backupFile(fakeSource, backupFileName)
+
+	// fake source renamed to backup file
+	//
+	assert.NoFileExists(t, fakeSource)
+	assert.FileExists(t, backupFileName)
+
+	// cleaning
+	//
+  os.Remove(backupFileName)
+}
+
+func TestBackupFileAlreadyExists(t *testing.T) {
+	env, _ := config.Load("testdata/install.forcelinks.yml")
+
+  pack := env.Packages["mypackage"]
+	file := pack.Files[0]
+
+  // creates a Source backup to prevent real Source removal
+  //
+  fakeSource := file.Source + ".bkp"
+  os.Symlink(file.Source, fakeSource)
+
+  backupFileName := backupFileName(fakeSource)
+
+  os.Symlink(fakeSource, backupFileName)
+
+	// backup file doesn't exist yet
+	//
+	assert.FileExists(t, fakeSource)
+	assert.FileExists(t, backupFileName)
+
+  newBackupFile, _ := backupFile(fakeSource, backupFileName)
+
+  // fake source renamed to backup file
+	//
+	assert.FileExists(t, fakeSource)
+	assert.NoFileExists(t, backupFileName)
+  assert.FileExists(t, newBackupFile)
+
+	// cleaning
+	//
+  os.Remove(fakeSource)
+  os.Remove(newBackupFile)
+}
+
+func TestBackupFileName(t *testing.T) {
+  backupFilename := backupFileName("file")
+
+  assert.Equal(t, len(backupFilename), 24)
+
+  otherBackupFileName := backupFileName(backupFilename)
+
+  assert.Equal(t, len(otherBackupFileName), 24)
+}
 
 func cleanSymlinks(path string) {
 	files, _ := filepath.Glob(filepath.Clean(path + "/.*"))
