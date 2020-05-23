@@ -49,60 +49,59 @@ func TestLoadLinksPackages(t *testing.T) {
 }
 
 func TestResolveEnvVarToValue(t *testing.T) {
-  path := resolveEnvVar("${HOME}", os.UserHomeDir)
+	path := resolveEnvVar("${HOME}", os.UserHomeDir)
 
-  assert.Equal(t, path, "/root")
+	assert.Equal(t, path, "/root")
 }
 
 func TestResolveEnvVarToDefault(t *testing.T) {
-  path := resolveEnvVar("${NOPE}", os.Getwd)
-  pwd, _ := os.Getwd()
+	path := resolveEnvVar("${NOPE}", os.Getwd)
+	pwd, _ := os.Getwd()
 
-  assert.Equal(t, path, pwd)
+	assert.Equal(t, path, pwd)
 }
 
 func TestPublicPath(t *testing.T) {
-  assert.Equal(t, getPublicPath("/go/", "/xpto/file"), "/go/xpto/file")
+	assert.Equal(t, getPublicPath("/go/", "/xpto/file"), "/go/xpto/file")
 }
 
-
 func TestPrivatePath(t *testing.T) {
-  assert.Equal(t, getPrivatePath("/go/", "/xpto/.DS_Store"), "/go/xpto/.DS_Store")
+	assert.Equal(t, getPrivatePath("/go/", "/xpto/.DS_Store"), "/go/xpto/.DS_Store")
 }
 
 func TestInstallStatusEmptyPackage(t *testing.T) {
-  pack := Package{}
+	pack := Package{}
 
-  assert.Equal(t, pack.InstallStatus(), FullyInstalled)
+	assert.Equal(t, pack.InstallStatus(), FullyInstalled)
 }
 
 func TestInstallStatusNotInstalledFile(t *testing.T) {
-  pack := Package{
-    Files: []PackageFile{
-      PackageFile{Installed: false},
-    },
-  }
+	pack := Package{
+		Files: []PackageFile{
+			PackageFile{Installed: false},
+		},
+	}
 
-  assert.Equal(t, pack.InstallStatus(), NotInstalled)
+	assert.Equal(t, pack.InstallStatus(), NotInstalled)
 }
 
 func TestInstallStatusPartiallyInstalledFiles(t *testing.T) {
-  pack := Package{
-    Files: []PackageFile{
-      PackageFile{Installed: true},
-      PackageFile{Installed: false},
-    },
-  }
+	pack := Package{
+		Files: []PackageFile{
+			PackageFile{Installed: true},
+			PackageFile{Installed: false},
+		},
+	}
 
-  assert.Equal(t, pack.InstallStatus(), PartiallyInstalled)
+	assert.Equal(t, pack.InstallStatus(), PartiallyInstalled)
 }
 
 func TestInstallStatusFullyInstalledFiles(t *testing.T) {
-  pack := Package{
-    Files: []PackageFile{
-      PackageFile{Installed: true},
-    },
-  }
+	pack := Package{
+		Files: []PackageFile{
+			PackageFile{Installed: true},
+		},
+	}
 
-  assert.Equal(t, pack.InstallStatus(), FullyInstalled)
+	assert.Equal(t, pack.InstallStatus(), FullyInstalled)
 }

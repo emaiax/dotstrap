@@ -43,7 +43,7 @@ func PrintRevision(packagesInstall map[string]bool) {
 
 	for packName, installed := range packagesInstall {
 		var message string
-    fmt.Println(packName)
+		fmt.Println(packName)
 
 		if installed {
 			message = fmt.Sprintf(

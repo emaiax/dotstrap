@@ -11,17 +11,17 @@ import (
 func TestLoadNoConfig(t *testing.T) {
 	env, err := Load("testdata/nope.yml")
 
-  assert.Nil(t, env)
+	assert.Nil(t, env)
 
-  assert.EqualError(t, err, "open testdata/nope.yml: no such file or directory")
+	assert.EqualError(t, err, "open testdata/nope.yml: no such file or directory")
 }
 
 func TestLoadInvaliConfig(t *testing.T) {
 	env, err := Load("testdata/config.invalid.yml")
 
-  assert.Nil(t, env)
+	assert.Nil(t, env)
 
-  assert.EqualError(t, err, "yaml: did not find expected alphabetic or numeric character")
+	assert.EqualError(t, err, "yaml: did not find expected alphabetic or numeric character")
 }
 
 func TestLoadEmptyConfig(t *testing.T) {
