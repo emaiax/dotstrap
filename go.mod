@@ -8,6 +8,6 @@ require (
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/rakyll/gotest v0.0.0-20200206190159-3023d5d6366c // indirect
 	github.com/stretchr/testify v1.5.1
-	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
+	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
