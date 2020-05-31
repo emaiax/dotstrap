@@ -1,7 +1,7 @@
 package packages
 
 import (
-  "os"
+	"os"
 	"testing"
 
 	"github.com/emaiax/dotstrap/config"
@@ -39,21 +39,21 @@ func TestBackupFileSuccess(t *testing.T) {
 }
 
 func TestBackupFileInvalidSourcePath(t *testing.T) {
-  fakeSource := "/invalidpath/invalid-path.file"
-  backupFileName := backupFileName(fakeSource)
+	fakeSource := "/invalidpath/invalid-path.file"
+	backupFileName := backupFileName(fakeSource)
 
 	// invalid file doesn't exist
 	//
 	assert.NoFileExists(t, fakeSource)
 	assert.NoFileExists(t, backupFileName)
 
-  newBackupFile, backupCreated :=	backupFile(fakeSource, backupFileName)
+	newBackupFile, backupCreated := backupFile(fakeSource, backupFileName)
 
 	assert.NoFileExists(t, fakeSource)
 	assert.NoFileExists(t, backupFileName)
 
-  assert.Empty(t, newBackupFile)
-  assert.False(t, backupCreated)
+	assert.Empty(t, newBackupFile)
+	assert.False(t, backupCreated)
 }
 
 func TestBackupFileInvalidTargetPath(t *testing.T) {
@@ -67,13 +67,13 @@ func TestBackupFileInvalidTargetPath(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-  newBackupFile, backupCreated :=	backupFile(file.Source, "/invalidpath/invalid.file")
+	newBackupFile, backupCreated := backupFile(file.Source, "/invalidpath/invalid.file")
 
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-  assert.Empty(t, newBackupFile)
-  assert.False(t, backupCreated)
+	assert.Empty(t, newBackupFile)
+	assert.False(t, backupCreated)
 }
 
 func TestBackupFileAlreadyExists(t *testing.T) {
@@ -108,6 +108,27 @@ func TestBackupFileAlreadyExists(t *testing.T) {
 	//
 	os.Remove(fakeSource)
 	os.Remove(newBackupFile)
+}
+
+func TestBackupFilePermissionError(t *testing.T) {
+	os.Mkdir("testdata/noperm", 0777)
+	os.Create("testdata/noperm/file")
+
+	assert.FileExists(t, "testdata/noperm/file")
+
+	os.Chmod("testdata/noperm", 0000)
+
+	assert.FileExists(t, "testdata/noperm/file")
+
+	backupFile, backupCreated := backupFile("testdata/noperm/file", "testdata/noperm/file.bkp")
+
+	assert.Empty(t, backupFile)
+	assert.False(t, backupCreated)
+
+	// cleaning
+	//
+	os.Chmod("testdata/noperm", 0777)
+	os.RemoveAll("testdata/noperm")
 }
 
 func TestBackupFileName(t *testing.T) {
