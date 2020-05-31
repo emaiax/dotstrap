@@ -12,3 +12,7 @@ setup:
 test:
 	DEBUG=true gotest $(TEST_OPTIONS) -v -failfast $(SOURCE_FILES) -run $(TEST_PATTERN) -covermode=atomic -coverprofile=coverage.out -timeout=30s
 	go tool cover -html=coverage.out -o coverage.html
+	
+.PHONY: fmt
+fmt:
+	go fmt ./...
