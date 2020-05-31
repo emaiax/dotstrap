@@ -3,21 +3,27 @@ package packages
 import (
 	"fmt"
 	"os"
-	"regexp"
-	"time"
 
 	"github.com/emaiax/dotstrap/config"
 	"github.com/emaiax/dotstrap/tty"
+
+	// "github.com/logrusorgru/aurora"
 )
 
 func Install(pack *config.Package) {
 	for index, _ := range pack.Files {
 		file := &pack.Files[index]
 
+    if fileExist(file.Target) && !pack.Force {
+      fmt.Println(useForceMessage(file.Target))
+
+      continue
+    }
+
 		if pack.Link {
-			linkFile(file, pack.Force)
+			linkFile(file)
 		} else {
-			copyFile(file, pack.Force)
+			copyFile(file)
 		}
 		// fmt.Printf("%+v\n", file)
 	}
@@ -25,62 +31,16 @@ func Install(pack *config.Package) {
 	// fmt.Printf("%+v\n", pack)
 }
 
-func linkFile(file *config.PackageFile, force bool) {
-	err := os.Symlink(file.Source, file.Target)
+func fileExist(file string) bool {
+  _, err := os.Lstat(file)
 
-	if os.IsExist(err) {
-		if force {
-			backupFileName := backupFileName(file.Target)
-
-			if _, createdBackup := backupFile(file.Target, backupFileName); createdBackup {
-				linkFile(file, force)
-
-				return
-			}
-		} else {
-			fmt.Println(terminal.Error("Link already exists. If you want to override this symlink, you should use the option"), terminal.Bold("force"))
-			fmt.Println(err.Error())
-			fmt.Println()
-
-			file.Installed = false
-		}
-	} else {
-		file.Installed = true
-
-		fmt.Println("Created symlink for", terminal.Bold(file.Name))
-	}
+  return !os.IsNotExist(err)
 }
 
-func copyFile(file *config.PackageFile, force bool) {
-	fmt.Println(terminal.Error("COPYING FILES IS NOT SUPPORTED"))
-}
-
-func backupFile(oldFileName, newFileName string) (string, bool) {
-	_, err := os.Lstat(newFileName)
-
-	if err == nil {
-		return backupFile(newFileName, backupFileName(newFileName))
-	} else if os.IsNotExist(err) {
-		err = os.Rename(oldFileName, newFileName)
-
-		if err != nil {
-			fmt.Println(terminal.Error("Error creating backup file [1]"))
-			fmt.Println(err)
-		} else {
-			fmt.Println(terminal.Warning("File already exist, created backup to " + terminal.Bold(newFileName)))
-
-			return newFileName, true
-		}
-	} else {
-		fmt.Println(terminal.Error("Error creating backup file [2]"))
-		fmt.Println(err)
-	}
-
-	return "", false
-}
-
-func backupFileName(file string) string {
-	backupFileName := regexp.MustCompile(`\.\d{15,}$`).ReplaceAllString(file, "")
-
-	return fmt.Sprintf("%s.%d", backupFileName, time.Now().UnixNano())
+func useForceMessage(file string) string {
+  return fmt.Sprintf(
+    terminal.Warning("File %s already exist. If you want to override this behaviour, you should use the option %s."),
+    terminal.Bold(file),
+    terminal.Bold("force"),
+  )
 }

@@ -1,0 +1,8 @@
+config:
+  source: .
+  target: .
+
+packages:
+  mypackage:
+    links:
+      linkpack: testdata/backup.yml
