@@ -1,7 +1,9 @@
 package packages
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/emaiax/dotstrap/config"
@@ -30,7 +32,7 @@ func TestInstallLinkFilesSuccess(t *testing.T) {
 
 	// cleaning
 	//
-	os.Remove(file.Target)
+	cleanSymlinks(env.Config.Target)
 }
 
 func TestInstallLinkFilesError(t *testing.T) {
@@ -54,7 +56,7 @@ func TestInstallLinkFilesError(t *testing.T) {
 
 	// cleaning
 	//
-	os.Remove(file.Target)
+	cleanSymlinks(env.Config.Target)
 }
 
 func TestInstallLinkFilesForce(t *testing.T) {
@@ -90,5 +92,19 @@ func TestInstallLinkFilesForce(t *testing.T) {
 
 	// cleaning
 	//
-	os.Remove(file.Target)
+	cleanSymlinks(env.Config.Target)
+}
+
+func cleanSymlinks(path string) {
+	files, _ := filepath.Glob(filepath.Clean(path + "/.*"))
+
+	for _, file := range files {
+		_, err := os.Readlink(file)
+
+		if err == nil {
+			os.Remove(file)
+		} else {
+			fmt.Println(err)
+		}
+	}
 }
