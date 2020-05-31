@@ -61,7 +61,7 @@ func (pack *Package) resolveGlobFilePaths(sourcePath, targetPath string) {
 		baseName := filepath.Base(file)
 
 		fileSource := file
-		fileTarget := getPrivatePath(targetPath, baseName)
+		fileTarget := getHiddenPath(targetPath, baseName)
 
 		globFile := PackageFile{Name: baseName, Source: fileSource, Target: fileTarget}
 
@@ -74,7 +74,7 @@ func (pack *Package) resolveLinkFilePaths(sourcePath, targetPath string) {
 		baseName := filepath.Base(sourceName)
 
 		sourcePath := getPublicPath(sourcePath, sourceName)
-		targetPath := getPrivatePath(targetPath, targetName)
+		targetPath := getHiddenPath(targetPath, targetName)
 
 		linkFile := PackageFile{Name: baseName, Source: sourcePath, Target: targetPath}
 
@@ -128,7 +128,7 @@ func getPublicPath(base string, file string) string {
 	return filepath.Join(base, file)
 }
 
-func getPrivatePath(base string, file string) string {
+func getHiddenPath(base string, file string) string {
 	if strings.HasPrefix(file, ".") {
 		return filepath.Join(base, file)
 	} else {

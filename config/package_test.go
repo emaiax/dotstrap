@@ -66,7 +66,7 @@ func TestPublicPath(t *testing.T) {
 }
 
 func TestPrivatePath(t *testing.T) {
-	assert.Equal(t, getPrivatePath("/go/", "/xpto/.DS_Store"), "/go/xpto/.DS_Store")
+	assert.Equal(t, getHiddenPath("/go/", "/xpto/.DS_Store"), "/go/xpto/.DS_Store")
 }
 
 func TestInstallStatusEmptyPackage(t *testing.T) {
