@@ -2,7 +2,7 @@ package packages
 
 import (
 	"fmt"
-  "io"
+	"io"
 	"os"
 
 	"github.com/emaiax/dotstrap/config"
@@ -10,46 +10,46 @@ import (
 )
 
 func copyFile(file *config.PackageFile) {
-  if fileExist(file.Target) {
-    backupFileName := backupFileName(file.Target)
+	if fileExist(file.Target) {
+		backupFileName := backupFileName(file.Target)
 
-    if _, createdBackup := backupFile(file.Target, backupFileName); createdBackup {
-      copyFile(file)
+		if _, createdBackup := backupFile(file.Target, backupFileName); createdBackup {
+			copyFile(file)
 
-      return
-    }
-  } else {
-    sourceFile, err := os.Open(file.Source)
+			return
+		}
+	} else {
+		sourceFile, err := os.Open(file.Source)
 
-    if err != nil {
-      fmt.Println(terminal.Error("Error copying file from source"))
-      fmt.Println(err)
+		if err != nil {
+			fmt.Println(terminal.Error("Error copying file from source"))
+			fmt.Println(err)
 
-      return
-    }
+			return
+		}
 
-    defer sourceFile.Close()
+		defer sourceFile.Close()
 
-    targetFile, err := os.Create(file.Target)
+		targetFile, err := os.Create(file.Target)
 
-    if err != nil {
-      fmt.Println(terminal.Error("Error copying file to target"))
-      fmt.Println(err)
+		if err != nil {
+			fmt.Println(terminal.Error("Error copying file to target"))
+			fmt.Println(err)
 
-      return
-    }
+			return
+		}
 
-    defer targetFile.Close()
+		defer targetFile.Close()
 
-    copiedBytes, err := io.Copy(targetFile, sourceFile)
+		copiedBytes, err := io.Copy(targetFile, sourceFile)
 
-    if err != nil {
-      fmt.Println(terminal.Error("Error copying file from source to target"))
-      fmt.Println(err)
-    } else {
-      fmt.Println(fmt.Printf("Copied %d bytes", copiedBytes))
+		if err != nil {
+			fmt.Println(terminal.Error("Error copying file from source to target"))
+			fmt.Println(err)
+		} else {
+			fmt.Println(fmt.Printf("Copied %d bytes", copiedBytes))
 
-      file.Installed = true
-    }
-  }
+			file.Installed = true
+		}
+	}
 }

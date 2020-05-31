@@ -39,7 +39,7 @@ func TestInstallCopyFilesError(t *testing.T) {
 	pack := env.Packages["mypackage"]
 	file := pack.Files[0]
 
-  os.Symlink(file.Source, file.Target)
+	os.Symlink(file.Source, file.Target)
 
 	// both files exists
 	//

@@ -16,25 +16,25 @@ func backupFileName(file string) string {
 }
 
 func backupFile(oldFileName, newFileName string) (string, bool) {
-  _, err := os.Lstat(newFileName)
+	_, err := os.Lstat(newFileName)
 
-  if err == nil {
-    return backupFile(newFileName, backupFileName(newFileName))
-  } else if os.IsNotExist(err) {
-    err = os.Rename(oldFileName, newFileName)
+	if err == nil {
+		return backupFile(newFileName, backupFileName(newFileName))
+	} else if os.IsNotExist(err) {
+		err = os.Rename(oldFileName, newFileName)
 
-    if err != nil {
-      fmt.Println(terminal.Error("Error creating backup file [1]"))
-      fmt.Println(err)
-    } else {
-      fmt.Println(terminal.Warning("File already exist, created backup to " + terminal.Bold(newFileName)))
+		if err != nil {
+			fmt.Println(terminal.Error("Error creating backup file [1]"))
+			fmt.Println(err)
+		} else {
+			fmt.Println(terminal.Warning("File already exist, created backup to " + terminal.Bold(newFileName)))
 
-      return newFileName, true
-    }
-  } else {
-    fmt.Println(terminal.Error("Error creating backup file [2]"))
-    fmt.Println(err)
-  }
+			return newFileName, true
+		}
+	} else {
+		fmt.Println(terminal.Error("Error creating backup file [2]"))
+		fmt.Println(err)
+	}
 
-  return "", false
+	return "", false
 }
