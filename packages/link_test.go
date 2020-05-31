@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInstallLinkFilesSuccess(t *testing.T) {
+func TestLinkFilesSuccess(t *testing.T) {
 	env, _ := config.Load("testdata/install.links.yml")
 
 	pack := env.Packages["mypackage"]
@@ -35,7 +35,7 @@ func TestInstallLinkFilesSuccess(t *testing.T) {
 	cleanSymlinks(env.Config.Target)
 }
 
-func TestInstallLinkFilesError(t *testing.T) {
+func TestLinkFilesForceError(t *testing.T) {
 	env, _ := config.Load("testdata/install.links.yml")
 
 	pack := env.Packages["mypackage"]
@@ -59,7 +59,7 @@ func TestInstallLinkFilesError(t *testing.T) {
 	cleanSymlinks(env.Config.Target)
 }
 
-func TestInstallLinkFilesForce(t *testing.T) {
+func TestLinkFilesForceSuccess(t *testing.T) {
 	env, _ := config.Load("testdata/install.forcelinks.yml")
 
 	pack := env.Packages["mypackage"]
