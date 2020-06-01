@@ -4,29 +4,28 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/emaiax/dotstrap/config"
 	"github.com/emaiax/dotstrap/tty"
 )
 
-func linkFile(file *config.PackageFile) {
-	if fileExist(file.Target) {
-		backupFileName := backupFileName(file.Target)
+func linkFile(name, source, target string) bool {
+	if fileExist(target) {
+		backupFileName := backupFileName(target)
 
-		if _, createdBackup := backupFile(file.Target, backupFileName); createdBackup {
-			linkFile(file)
-
-			return
+		if _, createdBackup := backupFile(target, backupFileName); createdBackup {
+			return linkFile(name, source, target)
 		}
 	} else {
-		err := os.Symlink(file.Source, file.Target)
+		err := os.Symlink(source, target)
 
 		if err != nil {
-			fmt.Println(terminal.Error("Error linking file"))
+			fmt.Println(fmt.Sprintf(terminal.Error("Error linking file %s"), terminal.Bold(name)))
 			fmt.Println(err)
-		} else {
-			file.Installed = true
 
-			fmt.Println("Created symlink for", terminal.Bold(file.Name))
+			return false
+		} else {
+			fmt.Println(fmt.Sprintf(terminal.Warning("Created symlink for %s"), terminal.Bold(name)))
 		}
 	}
+
+	return true
 }

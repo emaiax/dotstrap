@@ -1,110 +1,134 @@
 package packages
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/emaiax/dotstrap/config"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLinkFilesSuccess(t *testing.T) {
-	env, _ := config.Load("testdata/install.links.yml")
+const (
+	noPerms   = 000
+	fullPerms = 777
+)
 
-	pack := env.Packages["mypackage"]
-	file := pack.Files[0]
+func TestLinkFileSuccess(t *testing.T) {
+	// setup
+	//
+	source := "testfile"
+	target := "testfile.link"
+
+	os.Create(source)
 
 	// target file doesn't exist yet
 	//
-	assert.FileExists(t, file.Source)
-	assert.NoFileExists(t, file.Target)
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
 
-	Install(&pack)
+	assert.True(t, linkFile("testfile", source, target))
 
 	// now both files exist
 	//
-	assert.FileExists(t, file.Source)
-	assert.FileExists(t, file.Target)
+	assert.FileExists(t, source)
+	assert.FileExists(t, target)
 
-	assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
-
-	// cleaning
+	// teardown
 	//
-	cleanSymlinks(env.Config.Target)
+	os.Remove(source)
+	os.Remove(target)
 }
 
-func TestLinkFilesForceError(t *testing.T) {
-	env, _ := config.Load("testdata/install.links.yml")
-
-	pack := env.Packages["mypackage"]
-	file := pack.Files[0]
-
-	os.Symlink(file.Source, file.Target)
-
-	// both files exists
+func TestLinkFileBackupSuccess(t *testing.T) {
+	// setup
 	//
-	assert.FileExists(t, file.Source)
-	assert.FileExists(t, file.Target)
+	source := "testfile"
+	target := "testfile.link"
 
-	// error when trying to link again without FORCE option
-	//
-	Install(&pack)
-
-	assert.Equal(t, pack.InstallStatus(), config.NotInstalled)
-
-	// cleaning
-	//
-	cleanSymlinks(env.Config.Target)
-}
-
-func TestLinkFilesForceSuccess(t *testing.T) {
-	env, _ := config.Load("testdata/install.forcelinks.yml")
-
-	pack := env.Packages["mypackage"]
-	file := pack.Files[0]
+	os.Create(source)
+	os.Create(target)
 
 	// target file doesn't exist yet
 	//
-	assert.FileExists(t, file.Source)
-	assert.NoFileExists(t, file.Target)
+	assert.FileExists(t, source)
+	assert.FileExists(t, target)
 
-	Install(&pack)
-
-	assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
+	assert.True(t, linkFile("testfile", source, target))
 
 	// now both files exist
 	//
-	assert.FileExists(t, file.Source)
-	assert.FileExists(t, file.Target)
+	assert.FileExists(t, source)
+	assert.FileExists(t, target)
 
-	// success when trying to link again with FORCE option
+	// teardown
 	//
-	Install(&pack)
+	os.Remove(source)
+	os.Remove(target)
 
-	assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
-
-	// both files still exist
-	//
-	assert.FileExists(t, file.Source)
-	assert.FileExists(t, file.Target)
-
-	// cleaning
-	//
-	cleanSymlinks(env.Config.Target)
+	cleanLinkBackups()
 }
 
-func cleanSymlinks(path string) {
-	files, _ := filepath.Glob(filepath.Clean(path + "/.*"))
+func TestLinkFileInvalidTargetError(t *testing.T) {
+	// setup
+	//
+	source := "testfile"
+	target := "invalid/testfile.link"
+
+	os.Create(source)
+
+	// target file exists
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	assert.False(t, linkFile("testfile", source, target))
+
+	// target file still doesn't exist
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	// teardown
+	//
+	os.Remove(source)
+}
+
+func TestLinkFilePermissionError(t *testing.T) {
+	// setup
+	//
+	os.Mkdir("noperm", fullPerms)
+
+	source := "testfile"
+	target := "noperm/testfile.link"
+
+	os.Create(source)
+
+	// target file doesn't exist yet
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	os.Chmod("noperm", noPerms)
+
+	assert.False(t, linkFile("testfile", source, target))
+
+	// target file still doesn't exist
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	// teardown
+	//
+	os.Chmod("noperm", fullPerms)
+	os.RemoveAll("noperm")
+
+	os.Remove(source)
+}
+
+func cleanLinkBackups() {
+	files, _ := filepath.Glob("*.link.*")
 
 	for _, file := range files {
-		_, err := os.Readlink(file)
-
-		if err == nil {
-			os.Remove(file)
-		} else {
-			fmt.Println(err)
-		}
+		os.Remove(filepath.Clean(file))
 	}
 }

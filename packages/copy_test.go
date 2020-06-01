@@ -2,55 +2,115 @@ package packages
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/emaiax/dotstrap/config"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInstallCopyFilesSuccess(t *testing.T) {
-	env, _ := config.Load("testdata/install.copy.yml")
+func TestCopyFileSuccess(t *testing.T) {
+	// setup
+	//
+	source := "testfile"
+	target := "testfile.copy"
 
-	pack := env.Packages["mypackage"]
-	file := pack.Files[0]
+	os.Create(source)
 
 	// target file doesn't exist yet
 	//
-	assert.FileExists(t, file.Source)
-	assert.NoFileExists(t, file.Target)
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
 
-	Install(&pack)
+	assert.True(t, copyFile("testfile", source, target))
 
 	// now both files exist
 	//
-	assert.FileExists(t, file.Source)
-	assert.FileExists(t, file.Target)
+	assert.FileExists(t, source)
+	assert.FileExists(t, target)
 
-	assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
-
-	// cleaning
+	// teardown
 	//
-	os.Remove(file.Target)
+	os.Remove(source)
+	os.Remove(target)
 }
 
-func TestInstallCopyFilesError(t *testing.T) {
-	env, _ := config.Load("testdata/install.copy.yml")
-
-	pack := env.Packages["mypackage"]
-	file := pack.Files[0]
-
-	os.Symlink(file.Source, file.Target)
-
-	// both files exists
+func TestCopyFileBackupSuccess(t *testing.T) {
+	// setup
 	//
-	assert.FileExists(t, file.Source)
-	assert.FileExists(t, file.Target)
+	source := "testfile"
+	target := "testfile.copy"
 
-	Install(&pack)
+	os.Create(source)
+	os.Create(target)
 
-	assert.Equal(t, pack.InstallStatus(), config.NotInstalled)
-
-	// cleaning
+	// target file exists
 	//
-	os.Remove(file.Target)
+	assert.FileExists(t, source)
+	assert.FileExists(t, target)
+
+	assert.True(t, copyFile("testfile", source, target))
+
+	// now both files exist
+	//
+	assert.FileExists(t, source)
+	assert.FileExists(t, target)
+
+	// teardown
+	//
+	os.Remove(source)
+	os.Remove(target)
+
+	cleanCopyBackups()
+}
+
+func TestCopyFileInvalidSourceError(t *testing.T) {
+	// setup
+	//
+	source := "testfile"
+	target := "testfile.copy"
+
+	// no file exists
+	//
+	assert.NoFileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	assert.False(t, copyFile("testfile", source, target))
+
+	// now both files exist
+	//
+	assert.NoFileExists(t, source)
+	assert.NoFileExists(t, target)
+}
+
+func TestCopyFileInvalidTargetError(t *testing.T) {
+	// setup
+	//
+	source := "testfile"
+	target := "invalid/testfile.copy"
+
+	os.Create(source)
+
+	// no file exists
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	assert.False(t, copyFile("testfile", source, target))
+
+	// now both files exist
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	// teardown
+	//
+	os.Remove(source)
+}
+
+func cleanCopyBackups() {
+	files, _ := filepath.Glob("*.copy.*")
+
+	for _, file := range files {
+		os.Remove(filepath.Clean(file))
+	}
 }
