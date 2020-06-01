@@ -59,6 +59,38 @@ func TestInstallCopySuccess(t *testing.T) {
 	os.Remove(file.Target)
 }
 
+func TestInstallPartiallySuccess(t *testing.T) {
+	env, _ := config.Load("testdata/install.multiple.yml")
+
+	pack := env.Packages["mypackage"]
+
+	copypack := pack.Files[0]
+	linkpack := pack.Files[1]
+
+	// this file exist but it won't be installed without FORCE
+	//
+	os.Symlink(copypack.Source, copypack.Target)
+
+	assert.FileExists(t, copypack.Source)
+	assert.FileExists(t, linkpack.Source)
+	assert.FileExists(t, copypack.Target)
+	assert.NoFileExists(t, linkpack.Target)
+
+	Install(&pack)
+
+	assert.Equal(t, pack.InstallStatus(), config.PartiallyInstalled)
+
+	assert.FileExists(t, copypack.Source)
+	assert.FileExists(t, linkpack.Source)
+	assert.FileExists(t, copypack.Target)
+	assert.FileExists(t, linkpack.Target)
+
+	// cleaning
+	//
+	os.Remove(copypack.Target)
+	os.Remove(linkpack.Target)
+}
+
 func TestInstallSkipWithoutForceWhenTargetExist(t *testing.T) {
 	env, _ := config.Load("testdata/install.links.yml")
 

@@ -1,0 +1,9 @@
+config:
+  source: .
+  target: .
+
+packages:
+  mypackage:
+    links:
+      copypack: testdata/install.copy.yml
+      linkpack: testdata/install.links.yml
