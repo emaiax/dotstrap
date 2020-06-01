@@ -107,6 +107,38 @@ func TestCopyFileInvalidTargetError(t *testing.T) {
 	os.Remove(source)
 }
 
+func TestCopyFilePermissionError(t *testing.T) {
+	// setup
+	//
+	os.Mkdir("noperm", fullPerms)
+
+	source := "testfile"
+	target := "noperm/testfile.copy"
+
+	os.Create(source)
+
+	// target file doesn't exist yet
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	os.Chmod("noperm", noPerms)
+
+	assert.False(t, copyFile("testfile", source, target))
+
+	// target file still doesn't exist
+	//
+	assert.FileExists(t, source)
+	assert.NoFileExists(t, target)
+
+	// teardown
+	//
+	os.Chmod("noperm", fullPerms)
+	os.RemoveAll("noperm")
+
+	os.Remove(source)
+}
+
 func cleanCopyBackups() {
 	files, _ := filepath.Glob("*.copy.*")
 
