@@ -6,10 +6,11 @@ import (
 
 	"github.com/emaiax/dotstrap/config"
 	"github.com/emaiax/dotstrap/tty"
-	// "github.com/logrusorgru/aurora"
 )
 
 func Install(pack *config.Package) {
+	var installFile func(name, source, target string) bool
+
 	for index, _ := range pack.Files {
 		file := &pack.Files[index]
 
@@ -20,20 +21,19 @@ func Install(pack *config.Package) {
 		}
 
 		if pack.Link {
-			linkFile(file)
+			installFile = linkFile
 		} else {
-			copyFile(file)
+			installFile = copyFile
 		}
-		// fmt.Printf("%+v\n", file)
-	}
 
-	// fmt.Printf("%+v\n", pack)
+		file.Installed = installFile(file.Name, file.Source, file.Target)
+	}
 }
 
 func fileExist(file string) bool {
 	_, err := os.Lstat(file)
 
-	return !os.IsNotExist(err)
+	return err == nil
 }
 
 func useForceMessage(file string) string {
