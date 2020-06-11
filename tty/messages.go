@@ -1,12 +1,21 @@
-package terminal
+package tty
 
 import (
 	"bufio"
 	"fmt"
 	"io"
 	"strings"
+)
 
-	"github.com/logrusorgru/aurora"
+const (
+	COLUMNS      = 80
+	DIVIDER      = "="
+	BEER         = "\xf0\x9f\x8d\xba"
+	BROKEN_HEART = "\xF0\x9F\x92\x94"
+	CHECK_MARK   = "\xE2\x9C\x85"
+	COMPUTER     = "\xF0\x9F\x92\xBB"
+	WAVE         = "\xF0\x9F\x91\x8B"
+	BUG          = "\xF0\x9F\x90\x9B"
 )
 
 func Confirm(message string, ioReader io.Reader) bool {
@@ -27,30 +36,17 @@ func confirmationMessage(text string) string {
 	return fmt.Sprintf("%s %ses %so", text, Bold("[Y]"), Bold("[n]"))
 }
 
-func Bold(message string) string {
-	return fmt.Sprintf("%s", aurora.Bold(message))
-}
+func Header(texts ...string) string {
+	fullText := strings.TrimSpace(strings.Join(texts, " "))
+	fullTextCount := strings.Count(fullText, "")
 
-func Error(message string) string {
-	return fmt.Sprintf("%s", aurora.Red(message))
-}
+	if fullText != "" {
+		dividers := strings.Repeat(DIVIDER, COLUMNS-fullTextCount)
 
-func Info(message string) string {
-	return fmt.Sprintf("%s", aurora.Cyan(message))
-}
+		return fmt.Sprintf("%s %s", Bold(fullText), dividers)
+	} else {
+		dividers := strings.Repeat(DIVIDER, COLUMNS)
 
-func Success(message string) string {
-	return fmt.Sprintf("%s", aurora.Green(message))
-}
-
-func Warning(message string) string {
-	return fmt.Sprintf("%s", aurora.Yellow(message))
-}
-
-func White(message string) string {
-	return fmt.Sprintf("%s", aurora.White(message))
-}
-
-func Gray(message string) string {
-	return fmt.Sprintf("%s", aurora.Gray(10, message))
+		return dividers
+	}
 }
