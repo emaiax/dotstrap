@@ -14,6 +14,12 @@ func Install(pack *config.Package) {
 	for index, _ := range pack.Files {
 		file := &pack.Files[index]
 
+		if !fileExist(file.Source) {
+			fmt.Println(sourceNotFoundMesage(file.Source))
+
+			continue
+		}
+
 		if fileExist(file.Target) && !pack.Force {
 			fmt.Println(useForceMessage(file.Target))
 
@@ -27,8 +33,9 @@ func Install(pack *config.Package) {
 		}
 
 		file.Installed = installFile(file.Name, file.Source, file.Target)
-		fmt.Println()
 	}
+
+	fmt.Println()
 }
 
 func fileExist(file string) bool {
@@ -43,4 +50,8 @@ func useForceMessage(file string) string {
 		tty.Bold(file),
 		tty.Bold("force"),
 	)
+}
+
+func sourceNotFoundMesage(file string) string {
+	return tty.Sprintf(tty.Warning("File %s not found, skipping."), tty.Bold(file))
 }

@@ -9,6 +9,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInstallSourceDoesntExist(t *testing.T) {
+	env, _ := config.Load("testdata/install.nofile.yml")
+
+	pack := env.Packages["mypackage"]
+	file := pack.Files[0]
+
+	assert.NoFileExists(t, file.Source)
+	assert.NoFileExists(t, file.Target)
+
+	Install(&pack)
+
+	assert.NoFileExists(t, file.Source)
+	assert.NoFileExists(t, file.Target)
+
+	assert.Equal(t, pack.InstallStatus(), config.NotInstalled)
+}
+
 func TestInstallLinkSuccess(t *testing.T) {
 	env, _ := config.Load("testdata/install.links.yml")
 
