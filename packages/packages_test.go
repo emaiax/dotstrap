@@ -9,6 +9,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInstallDryRun(t *testing.T) {
+	env, _ := config.Load("testdata/install.nofile.yml")
+
+	pack := env.Packages["mypackage"]
+	file := pack.Files[0]
+
+	assert.NoFileExists(t, file.Source)
+	assert.NoFileExists(t, file.Target)
+
+	Install(&pack, true)
+
+	assert.NoFileExists(t, file.Source)
+	assert.NoFileExists(t, file.Target)
+
+	assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
+}
+
 func TestInstallSourceDoesntExist(t *testing.T) {
 	env, _ := config.Load("testdata/install.nofile.yml")
 
@@ -18,7 +35,7 @@ func TestInstallSourceDoesntExist(t *testing.T) {
 	assert.NoFileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	Install(&pack)
+	Install(&pack, false)
 
 	assert.NoFileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
@@ -37,7 +54,7 @@ func TestInstallLinkSuccess(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	Install(&pack)
+	Install(&pack, false)
 
 	// now both files exist
 	//
@@ -62,7 +79,7 @@ func TestInstallCopySuccess(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.NoFileExists(t, file.Target)
 
-	Install(&pack)
+	Install(&pack, false)
 
 	// now both files exist
 	//
@@ -93,7 +110,7 @@ func TestInstallPartiallySuccess(t *testing.T) {
 	assert.FileExists(t, copypack.Target)
 	assert.NoFileExists(t, linkpack.Target)
 
-	Install(&pack)
+	Install(&pack, false)
 
 	assert.Equal(t, pack.InstallStatus(), config.PartiallyInstalled)
 
@@ -121,7 +138,7 @@ func TestInstallSkipWithoutForceWhenTargetExist(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.FileExists(t, file.Target)
 
-	Install(&pack)
+	Install(&pack, false)
 
 	assert.Equal(t, pack.InstallStatus(), config.NotInstalled)
 
@@ -143,7 +160,7 @@ func TestInstallSuccessWithForceWhenTargetExist(t *testing.T) {
 	assert.FileExists(t, file.Source)
 	assert.FileExists(t, file.Target)
 
-	Install(&pack)
+	Install(&pack, false)
 
 	assert.Equal(t, pack.InstallStatus(), config.FullyInstalled)
 

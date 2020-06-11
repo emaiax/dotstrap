@@ -56,7 +56,7 @@ func main() {
 			fmt.Println(tty.Sprintf(tty.Bold("[%s] installing files..."), pack.Name))
 			fmt.Println()
 
-			packages.Install(&pack)
+			packages.Install(&pack, env.Config.DryRun)
 		}
 
 		fmt.Println(tty.Header("Install revision"))

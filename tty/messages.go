@@ -90,3 +90,11 @@ func CopyErrorMessage(err string) string {
 func CopyCreatedMessage(name string) string {
 	return Sprintf(Success("Created copy for %s"), Bold(name))
 }
+
+func DryRunFileInstalledMessage(name string) string {
+	return Sprintf(
+		Info("%s %s installed").Bold(),
+		Info("[dry run]").Bold(),
+		Bold(name),
+	)
+}

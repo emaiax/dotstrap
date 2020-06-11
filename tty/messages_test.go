@@ -137,3 +137,15 @@ func TestCopyErrorMessage(t *testing.T) {
 		CopyErrorMessage("error"),
 	)
 }
+
+func TestDryRunFileInstalledMessage(t *testing.T) {
+	assert.Equal(
+		t,
+		aurora.Sprintf(
+			aurora.Cyan("%s %s installed").Bold(),
+			aurora.Cyan("[dry run]").Bold(),
+			aurora.Bold("file"),
+		),
+		DryRunFileInstalledMessage("file"),
+	)
+}

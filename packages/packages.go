@@ -8,11 +8,19 @@ import (
 	"github.com/emaiax/dotstrap/tty"
 )
 
-func Install(pack *config.Package) {
+func Install(pack *config.Package, dryRun bool) {
 	var installFile func(name, source, target string) bool
 
 	for index, _ := range pack.Files {
 		file := &pack.Files[index]
+
+		if dryRun {
+			fmt.Println(tty.DryRunFileInstalledMessage(file.Name))
+
+			file.Installed = true
+
+			continue
+		}
 
 		if !fileExist(file.Source) {
 			fmt.Println(tty.SourceFileNotFoundMessage(file.Source))
