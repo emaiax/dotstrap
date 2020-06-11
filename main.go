@@ -52,23 +52,23 @@ func main() {
 	fmt.Println()
 
 	if tty.Confirm("Proceed to install?", os.Stdin) {
-		packagesInstall := make(map[string]bool)
-
 		for _, pack := range env.Packages {
-			fmt.Println(tty.Sprintf("[%s] installing files...", tty.Bold(pack.Name)))
+			fmt.Println(tty.Sprintf(tty.Bold("[%s] installing files..."), pack.Name))
 			fmt.Println()
 
 			packages.Install(&pack)
 		}
 
-		fmt.Println("===> revision time")
+		fmt.Println(tty.Header("Install revision"))
 		fmt.Println()
-		printRevision(packagesInstall)
+
+		for _, pack := range env.Packages {
+			printRevision(pack)
+		}
 
 		fmt.Println()
 		fmt.Println(tty.Bold(tty.Header("dotfiles installed, please restart.", tty.BEER)))
 	} else {
-		fmt.Println()
 		fmt.Println(tty.Bold(tty.Header("your dotfiles won't be installed at this time.", tty.BROKEN_HEART)))
 	}
 
@@ -81,30 +81,32 @@ func printHeader() {
 	fmt.Println(tty.Header(header, tty.COMPUTER))
 }
 
-func printRevision(packagesInstall map[string]bool) {
-	fmt.Println(tty.Bold(tty.Header("dotfiles revision")))
-	fmt.Println(packagesInstall)
+func printRevision(pack config.Package) {
+	var message string
 
-	for packName, installed := range packagesInstall {
-		var message string
-		fmt.Println(packName)
-
-		if installed {
-			message = tty.Sprintf(
-				tty.Success("%s %s %s"),
-				"[+]",
-				tty.White(packName),
-				"was successfully installed",
-			)
-		} else {
-			message = tty.Sprintf(
-				tty.Warning("%s %s %s"),
-				"[-]",
-				tty.White(packName),
-				"was partially installed, please review",
-			)
-		}
-
-		fmt.Println(tty.Bold(message))
+	switch pack.InstallStatus() {
+	case config.NotInstalled:
+		message = tty.Sprintf(
+			tty.Error("%s %s %s").Bold(),
+			"[-]",
+			tty.White(pack.Name).Bold(),
+			"was not installed, please check",
+		)
+	case config.PartiallyInstalled:
+		message = tty.Sprintf(
+			tty.Warning("%s %s %s").Bold(),
+			"[*]",
+			tty.White(pack.Name).Bold(),
+			"was partially installed, please review",
+		)
+	case config.FullyInstalled:
+		message = tty.Sprintf(
+			tty.Success("%s %s %s").Bold(),
+			"[+]",
+			tty.White(pack.Name).Bold(),
+			"was successfully installed",
+		)
 	}
+
+	fmt.Println(message)
 }

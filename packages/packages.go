@@ -27,6 +27,7 @@ func Install(pack *config.Package) {
 		}
 
 		file.Installed = installFile(file.Name, file.Source, file.Target)
+		fmt.Println()
 	}
 }
 
