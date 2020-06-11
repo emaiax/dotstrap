@@ -98,3 +98,30 @@ func DryRunFileInstalledMessage(name string) string {
 		Bold(name),
 	)
 }
+
+func PackageNotInstalledMessage(name string) string {
+	return Sprintf(
+		Error("%s %s %s").Bold(),
+		"[-]",
+		White(name).Bold(),
+		"was not installed, please check",
+	)
+}
+
+func PackagePartiallyInstalledMessage(name string) string {
+	return Sprintf(
+		Warning("%s %s %s").Bold(),
+		"[*]",
+		White(name).Bold(),
+		"was partially installed, please review",
+	)
+}
+
+func PackageFullyInstalledMessage(name string) string {
+	return Sprintf(
+		Success("%s %s %s").Bold(),
+		"[+]",
+		White(name).Bold(),
+		"was successfully installed",
+	)
+}

@@ -149,3 +149,42 @@ func TestDryRunFileInstalledMessage(t *testing.T) {
 		DryRunFileInstalledMessage("file"),
 	)
 }
+
+func TestPackageNotInstalledMessage(t *testing.T) {
+	assert.Equal(
+		t,
+		aurora.Sprintf(
+			aurora.Red("%s %s %s").Bold(),
+			"[-]",
+			aurora.White("pack").Bold(),
+			"was not installed, please check",
+		),
+		PackageNotInstalledMessage("pack"),
+	)
+}
+
+func TestPackagePartiallyInstalledMessage(t *testing.T) {
+	assert.Equal(
+		t,
+		aurora.Sprintf(
+			aurora.Yellow("%s %s %s").Bold(),
+			"[*]",
+			aurora.White("pack").Bold(),
+			"was partially installed, please review",
+		),
+		PackagePartiallyInstalledMessage("pack"),
+	)
+}
+
+func TestPackageFullyInstalledMessage(t *testing.T) {
+	assert.Equal(
+		t,
+		aurora.Sprintf(
+			aurora.Green("%s %s %s").Bold(),
+			"[+]",
+			aurora.White("pack").Bold(),
+			"was successfully installed",
+		),
+		PackageFullyInstalledMessage("pack"),
+	)
+}

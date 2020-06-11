@@ -39,7 +39,9 @@ func init() {
 }
 
 func main() {
-	printHeader()
+	header := fmt.Sprintf("[%s/%s - %s]", runtime.GOOS, runtime.GOARCH, "dotfiles installation")
+
+	fmt.Println(tty.Header(header, tty.COMPUTER))
 	fmt.Println()
 
 	if env.Config.DryRun {
@@ -53,7 +55,7 @@ func main() {
 
 	if tty.Confirm("Proceed to install?", os.Stdin) {
 		for _, pack := range env.Packages {
-			fmt.Println(tty.Sprintf(tty.Bold("[%s] installing files..."), pack.Name))
+			fmt.Println(tty.Sprintf("[%s] installing files...", tty.Bold(pack.Name)))
 			fmt.Println()
 
 			packages.Install(&pack, env.Config.DryRun)
@@ -63,7 +65,14 @@ func main() {
 		fmt.Println()
 
 		for _, pack := range env.Packages {
-			printRevision(pack)
+			switch pack.InstallStatus() {
+			case config.NotInstalled:
+				fmt.Println(tty.PackageNotInstalledMessage(pack.Name))
+			case config.PartiallyInstalled:
+				fmt.Println(tty.PackagePartiallyInstalledMessage(pack.Name))
+			case config.FullyInstalled:
+				fmt.Println(tty.PackageFullyInstalledMessage(pack.Name))
+			}
 		}
 
 		fmt.Println()
@@ -73,40 +82,4 @@ func main() {
 	}
 
 	fmt.Println(tty.Header("[exiting now]", tty.WAVE))
-}
-
-func printHeader() {
-	header := fmt.Sprintf("[%s/%s - %s]", runtime.GOOS, runtime.GOARCH, "dotfiles installation")
-
-	fmt.Println(tty.Header(header, tty.COMPUTER))
-}
-
-func printRevision(pack config.Package) {
-	var message string
-
-	switch pack.InstallStatus() {
-	case config.NotInstalled:
-		message = tty.Sprintf(
-			tty.Error("%s %s %s").Bold(),
-			"[-]",
-			tty.White(pack.Name).Bold(),
-			"was not installed, please check",
-		)
-	case config.PartiallyInstalled:
-		message = tty.Sprintf(
-			tty.Warning("%s %s %s").Bold(),
-			"[*]",
-			tty.White(pack.Name).Bold(),
-			"was partially installed, please review",
-		)
-	case config.FullyInstalled:
-		message = tty.Sprintf(
-			tty.Success("%s %s %s").Bold(),
-			"[+]",
-			tty.White(pack.Name).Bold(),
-			"was successfully installed",
-		)
-	}
-
-	fmt.Println(message)
 }
