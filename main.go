@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/emaiax/dotstrap/config"
 	"github.com/emaiax/dotstrap/packages"
@@ -15,43 +16,95 @@ const configFile = "dotstrap.yml"
 var env *config.Environment
 
 func init() {
-  log.SetOutput(os.Stdout)
+	log.SetOutput(os.Stdout)
 
-  environment, err := config.Load(configFile)
+	environment, err := config.Load(configFile)
 
-  // TODO: check if user has read access to env.Config.Source
-  // TODO: check if user has write access to env.Config.Target
-  //
-  if os.IsNotExist(err) {
-    fmt.Println(terminal.Bold(terminal.Error("Installer config file not found, exiting now.")))
+	// TODO: check if user has read access to env.Config.Source
+	// TODO: check if user has write access to env.Config.Target
+	//
+	if os.IsNotExist(err) {
+		fmt.Println(tty.Error("Installer config file not found, exiting now.").Bold())
 
-    os.Exit(-1)
-  }
+		os.Exit(-1)
+	}
 
-  if err != nil {
-    fmt.Println(terminal.Bold(terminal.Error(fmt.Sprint(err))))
+	if err != nil {
+		fmt.Println(tty.Error(fmt.Sprint(err)).Bold())
 
-    os.Exit(-1)
-  }
+		os.Exit(-1)
+	}
 
-  env = environment
+	env = environment
 }
 
 func main() {
-	terminal.Start()
+	printHeader()
+	fmt.Println()
 
-	terminal.PrintConfigs(env.Config.Source, env.Config.Target, env.Config.DryRun)
+	if env.Config.DryRun {
+		fmt.Println(tty.Sprintf("This installer is running in %s mode, nothing will really be installed.", tty.Info("dry run").Bold()))
+		fmt.Println()
+	}
 
-	if terminal.Confirm("Proceed to install?", os.Stdin) {
+	fmt.Println("Source:", tty.Bold(env.Config.Source))
+	fmt.Println("Target:", tty.Bold(env.Config.Target))
+	fmt.Println()
+
+	if tty.Confirm("Proceed to install?", os.Stdin) {
 		packagesInstall := make(map[string]bool)
 
 		for _, pack := range env.Packages {
-			packagesInstall[pack.Name] = packages.Install(pack)
+			fmt.Println(tty.Sprintf("[%s] installing files...", tty.Bold(pack.Name)))
+			fmt.Println()
+
+			packages.Install(&pack)
 		}
 
-		terminal.PrintRevision(packagesInstall)
-		terminal.Finish()
+		fmt.Println("===> revision time")
+		fmt.Println()
+		printRevision(packagesInstall)
+
+		fmt.Println()
+		fmt.Println(tty.Bold(tty.Header("dotfiles installed, please restart.", tty.BEER)))
 	} else {
-		terminal.Quit()
+		fmt.Println()
+		fmt.Println(tty.Bold(tty.Header("your dotfiles won't be installed at this time.", tty.BROKEN_HEART)))
+	}
+
+	fmt.Println(tty.Header("[exiting now]", tty.WAVE))
+}
+
+func printHeader() {
+	header := fmt.Sprintf("[%s/%s - %s]", runtime.GOOS, runtime.GOARCH, "dotfiles installation")
+
+	fmt.Println(tty.Header(header, tty.COMPUTER))
+}
+
+func printRevision(packagesInstall map[string]bool) {
+	fmt.Println(tty.Bold(tty.Header("dotfiles revision")))
+	fmt.Println(packagesInstall)
+
+	for packName, installed := range packagesInstall {
+		var message string
+		fmt.Println(packName)
+
+		if installed {
+			message = tty.Sprintf(
+				tty.Success("%s %s %s"),
+				"[+]",
+				tty.White(packName),
+				"was successfully installed",
+			)
+		} else {
+			message = tty.Sprintf(
+				tty.Warning("%s %s %s"),
+				"[-]",
+				tty.White(packName),
+				"was partially installed, please review",
+			)
+		}
+
+		fmt.Println(tty.Bold(message))
 	}
 }
