@@ -15,13 +15,13 @@ func Install(pack *config.Package) {
 		file := &pack.Files[index]
 
 		if !fileExist(file.Source) {
-			fmt.Println(sourceNotFoundMesage(file.Source))
+			fmt.Println(tty.SourceFileNotFoundMessage(file.Source))
 
 			continue
 		}
 
 		if fileExist(file.Target) && !pack.Force {
-			fmt.Println(useForceMessage(file.Target))
+			fmt.Println(tty.UseForceMessage(file.Target))
 
 			continue
 		}
@@ -42,16 +42,4 @@ func fileExist(file string) bool {
 	_, err := os.Lstat(file)
 
 	return err == nil
-}
-
-func useForceMessage(file string) string {
-	return tty.Sprintf(
-		tty.Warning("File %s already exist. If you want to override this behaviour, you should use the option %s."),
-		tty.Bold(file),
-		tty.Bold("force"),
-	)
-}
-
-func sourceNotFoundMesage(file string) string {
-	return tty.Sprintf(tty.Warning("File %s not found, skipping."), tty.Bold(file))
 }

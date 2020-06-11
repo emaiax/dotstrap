@@ -18,27 +18,13 @@ func linkFile(name, source, target string) bool {
 		err := os.Symlink(source, target)
 
 		if err != nil {
-			fmt.Println(linkError(err))
+			fmt.Println(tty.LinkErrorMessage(fmt.Sprint(err)))
 
 			return false
 		} else {
-			fmt.Println(linkCreatedWarning(name))
+			fmt.Println(tty.LinkCreatedMessage(name))
 		}
 	}
 
 	return true
-}
-
-func linkError(err error) string {
-	return tty.Sprintf(
-		tty.Error("Error linking file: %s"),
-		tty.Error(fmt.Sprint(err)).Bold(),
-	)
-}
-
-func linkCreatedWarning(name string) string {
-	return tty.Sprintf(
-		tty.Warning("Created symlink for %s"),
-		tty.Warning(name).Bold(),
-	)
 }

@@ -50,3 +50,43 @@ func Header(texts ...string) string {
 		return dividers
 	}
 }
+
+func UseForceMessage(file string) string {
+	return Sprintf(
+		Warning("File %s already exist. If you want to override this behaviour, you should use the option %s."),
+		Bold(file),
+		Bold("force"),
+	)
+}
+
+func SourceFileNotFoundMessage(file string) string {
+	return Sprintf(
+		Warning("File %s not found, %s."),
+		Bold(file),
+		Warning("skipping").Bold(),
+	)
+}
+
+func BackupErrorMessage(err string) string {
+	return Sprintf(Error("Error creating backup file: %s"), Error(err).Bold())
+}
+
+func BackupCreatedMessage(name string) string {
+	return Sprintf(Warning("File already exist, created backup to %s"), Bold(name))
+}
+
+func LinkErrorMessage(err string) string {
+	return Sprintf(Error("Error linking file: %s"), Error(err).Bold())
+}
+
+func LinkCreatedMessage(name string) string {
+	return Sprintf(Success("Created symlink for %s"), Bold(name))
+}
+
+func CopyErrorMessage(err string) string {
+	return Sprintf(Error("Error copying file: %s"), Error(err).Bold())
+}
+
+func CopyCreatedMessage(name string) string {
+	return Sprintf(Success("Created copy for %s"), Bold(name))
+}
