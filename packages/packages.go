@@ -37,9 +37,9 @@ func fileExist(file string) bool {
 }
 
 func useForceMessage(file string) string {
-	return fmt.Sprintf(
-		terminal.Warning("File %s already exist. If you want to override this behaviour, you should use the option %s."),
-		terminal.Bold(file),
-		terminal.Bold("force"),
+	return tty.Sprintf(
+		tty.Warning("File %s already exist. If you want to override this behaviour, you should use the option %s."),
+		tty.Bold(file),
+		tty.Bold("force"),
 	)
 }

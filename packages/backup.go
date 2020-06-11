@@ -24,17 +24,29 @@ func backupFile(oldFileName, newFileName string) (string, bool) {
 		err = os.Rename(oldFileName, newFileName)
 
 		if err != nil {
-			fmt.Println(terminal.Error("Error creating backup file [1]"))
-			fmt.Println(err)
+			fmt.Println(backupError(err))
 		} else {
-			fmt.Println(terminal.Warning("File already exist, created backup to " + terminal.Bold(newFileName)))
+			fmt.Println(backupCreatedWarning(newFileName))
 
 			return newFileName, true
 		}
 	} else {
-		fmt.Println(terminal.Error("Error creating backup file [2]"))
-		fmt.Println(err)
+		fmt.Println(backupError(err))
 	}
 
 	return "", false
+}
+
+func backupError(err error) string {
+	return tty.Sprintf(
+		tty.Error("Error creating backup file: %s"),
+		tty.Error(fmt.Sprint(err)).Bold(),
+	)
+}
+
+func backupCreatedWarning(name string) string {
+	return tty.Sprintf(
+		tty.Warning("File already exist, created backup to %s"),
+		tty.Warning(name).Bold(),
+	)
 }

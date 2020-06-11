@@ -20,8 +20,7 @@ func copyFile(name, source, target string) bool {
 		sourceFile, err := os.Open(source)
 
 		if err != nil {
-			fmt.Println(terminal.Error("Error copying file from source"))
-			fmt.Println(err)
+			fmt.Println(copyError(err))
 
 			return false
 		}
@@ -31,8 +30,7 @@ func copyFile(name, source, target string) bool {
 		targetFile, err := os.Create(target)
 
 		if err != nil {
-			fmt.Println(terminal.Error("Error copying file to target"))
-			fmt.Println(err)
+			fmt.Println(copyError(err))
 
 			return false
 		}
@@ -41,8 +39,22 @@ func copyFile(name, source, target string) bool {
 
 		io.Copy(targetFile, sourceFile)
 
-		fmt.Println("Copied file for", terminal.Bold(name))
+		fmt.Println(copyCreatedWarning(name))
 	}
 
 	return true
+}
+
+func copyError(err error) string {
+	return tty.Sprintf(
+		tty.Error("Error copying file: %s"),
+		tty.Error(fmt.Sprint(err)).Bold(),
+	)
+}
+
+func copyCreatedWarning(name string) string {
+	return tty.Sprintf(
+		tty.Warning("Created copy for %s"),
+		tty.Warning(name).Bold(),
+	)
 }
