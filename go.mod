@@ -9,5 +9,5 @@ require (
 	github.com/rakyll/gotest v0.0.4 // indirect
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
