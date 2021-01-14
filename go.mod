@@ -7,7 +7,7 @@ require (
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/rakyll/gotest v0.0.4 // indirect
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
